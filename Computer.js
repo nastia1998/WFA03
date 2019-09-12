@@ -9,7 +9,7 @@ var Computer = function(manufacturer, processor) {
     this.manufacturer = newManufacturer;
   };
 
-  this.processor = function() {
+  this.getProcessor = function() {
     return this.processor;
   };
   this.setProcessor = function(newProcessor) {
@@ -40,3 +40,29 @@ var ComputingServer = function(manufacturer, processor, numOfProcessorCores) {
     this.numOfProcessorCores = newNumOfProcessorCores;
   };
 };
+
+Ultrabook.prototype = Object.create(Computer.prototype);
+Ultrabook.prototype.constructor = Ultrabook;
+
+ComputingServer.prototype = Object.create(Computer.prototype);
+ComputingServer.prototype.constructor = ComputingServer;
+
+Computer.prototype.getInfo = function() {
+  return [this.manufacturer, this.processor];
+};
+
+Ultrabook.prototype.getInfo = function() {
+  return [this.hardDiskSize, this.manufacturer, this.processor];
+};
+
+ComputingServer.prototype.getInfo = function() {
+  return [this.numOfProcessorCores, this.manufacturer, this.processor];
+};
+
+var computer = new Computer("HP", "AMD");
+var ultrabook = new Ultrabook("Lenovo", "Intel", 256);
+var computingServer = new ComputingServer("ASUS", "Intel", 4);
+
+console.log(computer.getInfo());
+console.log(ultrabook.getInfo());
+console.log(computingServer.getInfo());
