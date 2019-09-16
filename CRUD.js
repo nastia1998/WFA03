@@ -72,15 +72,39 @@ function parseCompToTableRow(Comp) {
   row.appendChild(numOfProcessorCores);
 
   var deleteButton = document.createElement("td");
-  deleteButton.innerHTML =
-    "<button class='btn'><i class='fa fa-trash'></i></button>";
+  deleteButton.innerHTML = `<button class='btn delete' id='${id.innerHTML}'><i class='fa fa-trash '></i></button>`;
   row.appendChild(deleteButton);
 
   return row;
+}
+
+function onDelete(ev) {
+  ev.preventDefault();
+  var compID = ev.target.closest("button").id;
+  xhr = new XMLHttpRequest();
+  xhr.withCredentials = true;
+
+  xhr.addEventListener("readystatechange", function() {
+    if (this.readyState === 4) {
+      console.log(this.responseText);
+    }
+  });
+
+  xhr.open("DELETE", "http://localhost:2403/computers/" + compID);
+  xhr.setRequestHeader("Content-Type", "application/json");
+  xhr.send();
+  onRead();
+  location.reload();
 }
 
 (function() {
   document.getElementById("addComp").addEventListener("click", onCreate);
   document.getElementById("refresh").addEventListener("click", onRead);
   onRead();
+  setTimeout(function() {
+    var classname = document.getElementsByClassName("delete");
+    for (var i = 0; i < classname.length; i++) {
+      classname[i].addEventListener("click", onDelete);
+    }
+  }, 100);
 })();
