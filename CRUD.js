@@ -12,8 +12,6 @@ function onCreate(ev) {
   xhr.withCredentials = true;
   xhr.addEventListener("readystatechange", function() {
     if (this.readyState === 4) {
-      alert(this.responseText);
-      //document.getElementById("createForm").dispatchEvent(new Event("submit"));
     }
   });
 
@@ -22,6 +20,7 @@ function onCreate(ev) {
   xhr.send(data);
 
   onRead();
+  $("#myModal").modal("hide");
 }
 
 function onRead() {
@@ -51,6 +50,8 @@ function onRead() {
 function parseCompToTableRow(Comp) {
   var row = document.createElement("tr");
 
+  row.addEventListener("dblclick", openUpdateModal);
+
   id = document.createElement("th");
   id.innerText = Comp["id"];
   row.appendChild(id);
@@ -71,14 +72,66 @@ function parseCompToTableRow(Comp) {
   numOfProcessorCores.innerText = Comp["numOfProcessorCores"];
   row.appendChild(numOfProcessorCores);
 
-  var deleteButton = document.createElement("td");
-  deleteButton.innerHTML = `<button class='btn delete' id='${id.innerHTML}'><i class='fa fa-trash '></i></button>`;
-  row.appendChild(deleteButton);
+  var deleteTd = document.createElement("td");
+  var deleteBtn = document.createElement("button");
+  deleteBtn.id = id.innerHTML;
+  deleteBtn.className = "btn";
+  deleteBtn.innerHTML = "<i class='fa fa-trash '></i>";
+  deleteBtn.addEventListener("click", onDelete);
+  deleteTd.appendChild(deleteBtn);
+  row.appendChild(deleteTd);
 
   return row;
 }
 
+function openUpdateModal(ev) {
+  $("#updateModal").modal();
+  document.getElementById("updComp").value = ev.target.closest(
+    "tr"
+  ).childNodes[0].innerHTML;
+  document.getElementById("updManufacturer").value = ev.target.closest(
+    "tr"
+  ).childNodes[1].innerHTML;
+  document.getElementById("updProcessor").value = ev.target.closest(
+    "tr"
+  ).childNodes[2].innerHTML;
+  document.getElementById("updHardDisk").value = ev.target.closest(
+    "tr"
+  ).childNodes[3].innerHTML;
+  document.getElementById("updNumOfCores").value = ev.target.closest(
+    "tr"
+  ).childNodes[4].innerHTML;
+}
+
+function onUpdate(ev) {
+  ev.preventDefault();
+  console.log(ev.target.value);
+
+  var data = JSON.stringify({
+    manufacturer: String(document.getElementById("updManufacturer").value),
+    processor: String(document.getElementById("updProcessor").value),
+    hardDiskSize: String(document.getElementById("updHardDisk").value),
+    numOfProcessorCores: String(document.getElementById("updNumOfCores").value)
+  });
+  console.log(data);
+  xhr = new XMLHttpRequest();
+  xhr.withCredentials = true;
+
+  xhr.addEventListener("readystatechange", function() {
+    if (this.readyState === 4) {
+    }
+  });
+
+  xhr.open("PUT", "http://localhost:2403/computers/" + ev.target.value);
+  xhr.setRequestHeader("Content-Type", "application/json");
+  xhr.send(data);
+  onRead();
+  $("#updateModal").modal("hide");
+  location.reload();
+}
+
 function onDelete(ev) {
+  console.log("delete");
   ev.preventDefault();
   var compID = ev.target.closest("button").id;
   xhr = new XMLHttpRequest();
@@ -86,7 +139,6 @@ function onDelete(ev) {
 
   xhr.addEventListener("readystatechange", function() {
     if (this.readyState === 4) {
-      console.log(this.responseText);
     }
   });
 
@@ -99,12 +151,7 @@ function onDelete(ev) {
 
 (function() {
   document.getElementById("addComp").addEventListener("click", onCreate);
+  document.getElementById("updComp").addEventListener("click", onUpdate);
   document.getElementById("refresh").addEventListener("click", onRead);
   onRead();
-  setTimeout(function() {
-    var classname = document.getElementsByClassName("delete");
-    for (var i = 0; i < classname.length; i++) {
-      classname[i].addEventListener("click", onDelete);
-    }
-  }, 100);
 })();
